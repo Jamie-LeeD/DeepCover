@@ -14,8 +14,13 @@ public class DialogueLineData
     [SerializeField] private UnityEvent onLineStarted;
     [SerializeField] private UnityEvent onLineFinished;
 
+    [Header("Evidence (optional)")]
+    [Tooltip("When set, the dialogue UI can show this evidence card while the line is visible.")]
+    [SerializeField] private EvidenceData evidenceShownWithLine;
+
     public string SpeakerNameOverride => speakerNameOverride;
     public string Text => text;
+    public EvidenceData EvidenceShownWithLine => evidenceShownWithLine;
 
     public static DialogueLineData CreateRuntime(string lineText, string speakerOverride = "")
     {

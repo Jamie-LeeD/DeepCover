@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ public class SuspicionBarUI : MonoBehaviour
 {
     [SerializeField] private Slider suspicionSlider;
     [SerializeField] private Image fillImage;
-    [SerializeField] private Text levelLabel;
+    [SerializeField] private TextMeshProUGUI levelLabel;
     [SerializeField] private bool hideWhenClear = false;
 
     [Header("Colors")]

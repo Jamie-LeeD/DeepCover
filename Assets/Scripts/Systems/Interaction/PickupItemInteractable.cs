@@ -7,6 +7,7 @@ using UnityEngine.Events;
 public class PickupItemInteractable : MonoBehaviour, IInteractable
 {
     [SerializeField] private string itemName = "Item";
+    [SerializeField] private EvidenceData evidenceToCollect;
     [SerializeField] private bool destroyOnPickup = true;
     [SerializeField] private UnityEvent onPickedUp;
 
@@ -30,6 +31,12 @@ public class PickupItemInteractable : MonoBehaviour, IInteractable
         }
 
         isPickedUp = true;
+
+        if (evidenceToCollect != null && EvidenceInventory.Instance != null)
+        {
+            EvidenceInventory.Instance.TryAddEvidence(evidenceToCollect);
+        }
+
         onPickedUp?.Invoke();
         Debug.Log($"Picked up {itemName}.", this);
 

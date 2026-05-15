@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1564a476cc8506544a793c215d113878, type: 3}
+  m_Name: emergency_security_audio
+  m_EditorClassIdentifier: Assembly-CSharp::EvidenceData
+  displayName: Emergency Security Audio Log
+  description: An audio recording of Marcus Reed arguing with Evelyn Cross about
+    shutting down ARCHIVE after abnormal behavioral incidents were detected within
+    the facility.
+  icon: {fileID: 0}
+  category: 4
+  evidenceId: emergency_security_audio

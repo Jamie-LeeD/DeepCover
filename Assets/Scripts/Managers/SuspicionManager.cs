@@ -88,6 +88,25 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
     }
 
     /// <summary>
+    /// Applies a signed delta (positive raises, negative lowers). No-op when zero.
+    /// </summary>
+    public void ApplySuspicionDelta(float delta, bool persistState = true)
+    {
+        if (Mathf.Approximately(delta, 0f))
+        {
+            return;
+        }
+
+        if (delta > 0f)
+        {
+            ApplySuspicion(currentSuspicion + delta, persistState);
+            return;
+        }
+
+        ApplySuspicion(currentSuspicion + delta, persistState);
+    }
+
+    /// <summary>
     /// Decreases global suspicion and clamps the result to the valid range.
     /// </summary>
     public void ReduceSuspicion(float amount)

@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 public class InteractionPromptUI : MonoBehaviour
 {
     [SerializeField] private CanvasGroup canvasGroup;
-    [SerializeField] private Text promptText;
+    [SerializeField] private TextMeshProUGUI promptText;
     [SerializeField] private string promptFormat = "Press E to {0}";
 
     private void Awake()
