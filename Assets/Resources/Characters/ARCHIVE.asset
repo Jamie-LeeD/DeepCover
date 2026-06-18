@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCProfile
   characterDisplayName: ARCHIVE
   roleTitle: Predictive Intelligence System
+  isAccusable: 1
+  suspectID: ARCHIVE
+  accusationDisplayName: ARCHIVE
   personality: 'Emotionless, analytical, disturbingly calm. Speaks with certainty
     and precision. Views human behavior as predictable patterns rather than emotional
     experiences.
@@ -31,3 +34,11 @@ MonoBehaviour:
 '
   startingTrust: 0
   fallbackLineOnAiFailure: Input insufficient.
+  evidenceResponses:
+  - evidenceItem: {fileID: 11400000, guid: 7c8d4187d5f185a498ecd8b14f572271, type: 2}
+    requiredTrustLevel: 100
+    secretRevealed: this is the secret
+    successDialogue: success
+    failureDialogue: failure
+    suspicionPenalty: 50
+    hasBeenRevealed: 0

@@ -17,4 +17,6 @@ MonoBehaviour:
     \u201Cacceptable psychological collateral\u201D related to PROJECT ARCHIVE deployment.\n"
   icon: {fileID: 0}
   category: 3
+  suspicionModifier: -20
+  suspicionTone: 1
   evidenceId: executive_email_chain

@@ -47,6 +47,7 @@ public class FirstPersonController : MonoBehaviour
     private InputAction lookAction;
     private InputAction jumpAction;
     private InputAction sprintAction;
+    private InputActionMap playerActionMap;
 
     private Vector2 moveInput;
     private Vector2 lookInput;
@@ -57,8 +58,11 @@ public class FirstPersonController : MonoBehaviour
     private Vector3 movementVelocity;
     private bool inputActionsReady;
 
+    public bool IsGrounded => isGrounded;
+
     private void Awake()
     {
+        GameplayPauseController.EnsureExists();
         playerRigidbody = GetComponent<Rigidbody>();
         ConfigureRigidbody();
         ResolveGroundCheck();
@@ -253,8 +257,8 @@ public class FirstPersonController : MonoBehaviour
             return;
         }
 
-        InputActionMap playerMap = inputActions.FindActionMap(PlayerActionMapName, false);
-        if (playerMap == null)
+        playerActionMap = inputActions.FindActionMap(PlayerActionMapName, false);
+        if (playerActionMap == null)
         {
             Debug.LogError(
                 $"{nameof(FirstPersonController)} on {name} could not find the '{PlayerActionMapName}' action map.",
@@ -262,10 +266,10 @@ public class FirstPersonController : MonoBehaviour
             return;
         }
 
-        moveAction = playerMap.FindAction("Move", false);
-        lookAction = playerMap.FindAction("Look", false);
-        jumpAction = playerMap.FindAction("Jump", false);
-        sprintAction = playerMap.FindAction("Sprint", false);
+        moveAction = playerActionMap.FindAction("Move", false);
+        lookAction = playerActionMap.FindAction("Look", false);
+        jumpAction = playerActionMap.FindAction("Jump", false);
+        sprintAction = playerActionMap.FindAction("Sprint", false);
 
         if (moveAction == null || lookAction == null || jumpAction == null || sprintAction == null)
         {
@@ -301,12 +305,12 @@ public class FirstPersonController : MonoBehaviour
             return;
         }
 
-        inputActions.Enable();
+        playerActionMap?.Enable();
     }
 
     private void DisableInputActions()
     {
-        inputActions?.Disable();
+        playerActionMap?.Disable();
     }
 
     private void ResolveGroundCheck()

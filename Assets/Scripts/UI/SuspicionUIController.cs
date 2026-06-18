@@ -13,7 +13,7 @@ public class SuspicionUIController : MonoBehaviour
     {
         if (headerLabel != null)
         {
-            headerLabel.text = "SUSPICION";
+            headerLabel.text = "TRUST  |  SUSPICION";
         }
     }
 
@@ -21,7 +21,7 @@ public class SuspicionUIController : MonoBehaviour
     {
         if (headerLabel != null && string.IsNullOrWhiteSpace(headerLabel.text))
         {
-            headerLabel.text = "SUSPICION";
+            headerLabel.text = "TRUST  |  SUSPICION";
         }
     }
 

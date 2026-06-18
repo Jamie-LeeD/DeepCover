@@ -5,6 +5,22 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
+/// Runtime record for one discovered evidence item.
+/// </summary>
+public sealed class EvidenceCollectionRecord
+{
+    public EvidenceCollectionRecord(EvidenceData evidence, DateTime collectedAt)
+    {
+        Evidence = evidence;
+        CollectedAt = collectedAt;
+    }
+
+    public EvidenceData Evidence { get; }
+    public DateTime CollectedAt { get; }
+    public string CollectedAtDisplay => CollectedAt.ToString("yyyy-MM-dd HH:mm:ss");
+}
+
+/// <summary>
 /// Global collection of evidence gathered by the player during an investigation.
 /// </summary>
 public class EvidenceInventory : MonoBehaviour, IEvidenceContextProvider
@@ -14,13 +30,33 @@ public class EvidenceInventory : MonoBehaviour, IEvidenceContextProvider
     [SerializeField] private UnityEvent<EvidenceData> onEvidenceCollected;
     [SerializeField] private UnityEvent onInventoryChanged;
 
-    private readonly List<EvidenceData> collected = new List<EvidenceData>();
-    private readonly HashSet<EvidenceData> collectedSet = new HashSet<EvidenceData>();
+    private static readonly List<EvidenceCollectionRecord> runtimeCollectedRecords =
+        new List<EvidenceCollectionRecord>();
+    private static readonly HashSet<string> runtimeCollectedIds = new HashSet<string>();
+
+    private readonly List<EvidenceData> collectedEvidenceView = new List<EvidenceData>();
 
     public event Action<EvidenceData> EvidenceCollected;
     public event Action InventoryChanged;
 
-    public IReadOnlyList<EvidenceData> CollectedEvidence => collected;
+    public IReadOnlyList<EvidenceData> CollectedEvidence
+    {
+        get
+        {
+            RebuildEvidenceView();
+            return collectedEvidenceView;
+        }
+    }
+
+    public IReadOnlyList<EvidenceCollectionRecord> CollectedRecords => runtimeCollectedRecords;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetRuntimeState()
+    {
+        runtimeCollectedRecords.Clear();
+        runtimeCollectedIds.Clear();
+        Instance = null;
+    }
 
     private void Awake()
     {
@@ -31,6 +67,9 @@ public class EvidenceInventory : MonoBehaviour, IEvidenceContextProvider
         }
 
         Instance = this;
+        EnsureEvidenceJournalInput();
+        EnsureEvidenceSuspicionBridge();
+        EnsureRevealedSecretDatabase();
     }
 
     private void OnDestroy()
@@ -51,12 +90,17 @@ public class EvidenceInventory : MonoBehaviour, IEvidenceContextProvider
             return false;
         }
 
-        if (!collectedSet.Add(evidence))
+        string evidenceId = GetStableEvidenceId(evidence);
+        if (!runtimeCollectedIds.Add(evidenceId))
         {
             return false;
         }
 
-        collected.Add(evidence);
+        runtimeCollectedRecords.Add(new EvidenceCollectionRecord(evidence, DateTime.Now));
+        Debug.Log(
+            $"[Investigation] Evidence Collected: {evidence.DisplayName} ({evidence.EvidenceId}). " +
+            $"Total Collected: {runtimeCollectedRecords.Count}",
+            evidence);
         EvidenceCollected?.Invoke(evidence);
         onEvidenceCollected?.Invoke(evidence);
         InventoryChanged?.Invoke();
@@ -66,7 +110,7 @@ public class EvidenceInventory : MonoBehaviour, IEvidenceContextProvider
 
     public bool HasEvidence(EvidenceData evidence)
     {
-        return evidence != null && collectedSet.Contains(evidence);
+        return evidence != null && runtimeCollectedIds.Contains(GetStableEvidenceId(evidence));
     }
 
     public bool HasEvidenceById(string evidenceId)
@@ -76,28 +120,49 @@ public class EvidenceInventory : MonoBehaviour, IEvidenceContextProvider
             return false;
         }
 
-        for (int i = 0; i < collected.Count; i++)
+        return runtimeCollectedIds.Contains(evidenceId);
+    }
+
+    public EvidenceCollectionRecord GetRecord(EvidenceData evidence)
+    {
+        if (evidence == null)
         {
-            if (collected[i] != null && string.Equals(collected[i].EvidenceId, evidenceId, StringComparison.Ordinal))
+            return null;
+        }
+
+        string evidenceId = GetStableEvidenceId(evidence);
+        for (int i = 0; i < runtimeCollectedRecords.Count; i++)
+        {
+            EvidenceCollectionRecord record = runtimeCollectedRecords[i];
+            if (record?.Evidence != null && GetStableEvidenceId(record.Evidence) == evidenceId)
             {
-                return true;
+                return record;
             }
         }
 
-        return false;
+        return null;
+    }
+
+    public void ClearRuntimeEvidence()
+    {
+        runtimeCollectedRecords.Clear();
+        runtimeCollectedIds.Clear();
+        collectedEvidenceView.Clear();
+        InventoryChanged?.Invoke();
+        onInventoryChanged?.Invoke();
     }
 
     public string BuildEvidenceContextSummary()
     {
-        if (collected.Count == 0)
+        if (runtimeCollectedRecords.Count == 0)
         {
             return "No evidence collected.";
         }
 
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < collected.Count; i++)
+        for (int i = 0; i < runtimeCollectedRecords.Count; i++)
         {
-            EvidenceData item = collected[i];
+            EvidenceData item = runtimeCollectedRecords[i].Evidence;
             if (item == null)
             {
                 continue;
@@ -121,6 +186,67 @@ public class EvidenceInventory : MonoBehaviour, IEvidenceContextProvider
             builder.AppendLine(item.Description);
         }
 
+        if (RevealedSecretDatabase.Instance != null &&
+            RevealedSecretDatabase.Instance.RevealedSecrets.Count > 0)
+        {
+            builder.AppendLine();
+            builder.AppendLine("[Revealed Secrets]");
+            builder.Append(RevealedSecretDatabase.Instance.BuildSecretContextSummary());
+        }
+
         return builder.ToString();
+    }
+
+    private void RebuildEvidenceView()
+    {
+        collectedEvidenceView.Clear();
+        for (int i = 0; i < runtimeCollectedRecords.Count; i++)
+        {
+            EvidenceData evidence = runtimeCollectedRecords[i]?.Evidence;
+            if (evidence != null)
+            {
+                collectedEvidenceView.Add(evidence);
+            }
+        }
+    }
+
+    private static string GetStableEvidenceId(EvidenceData evidence)
+    {
+        return evidence != null ? evidence.EvidenceId : string.Empty;
+    }
+
+    private void EnsureEvidenceJournalInput()
+    {
+        EvidenceInventoryUI journal = FindFirstObjectByType<EvidenceInventoryUI>(FindObjectsInactive.Include);
+        if (journal != null)
+        {
+            if (!journal.gameObject.activeSelf)
+            {
+                journal.gameObject.SetActive(true);
+            }
+
+            return;
+        }
+
+        if (GetComponent<EvidenceJournalHotkey>() == null)
+        {
+            gameObject.AddComponent<EvidenceJournalHotkey>();
+        }
+    }
+
+    private void EnsureEvidenceSuspicionBridge()
+    {
+        if (GetComponent<EvidenceSuspicionBridge>() == null)
+        {
+            gameObject.AddComponent<EvidenceSuspicionBridge>();
+        }
+    }
+
+    private void EnsureRevealedSecretDatabase()
+    {
+        if (FindFirstObjectByType<RevealedSecretDatabase>(FindObjectsInactive.Include) == null)
+        {
+            gameObject.AddComponent<RevealedSecretDatabase>();
+        }
     }
 }

@@ -22,12 +22,13 @@ public class DialogueLineData
     public string Text => text;
     public EvidenceData EvidenceShownWithLine => evidenceShownWithLine;
 
-    public static DialogueLineData CreateRuntime(string lineText, string speakerOverride = "")
+    public static DialogueLineData CreateRuntime(string lineText, string speakerOverride = "", EvidenceData evidence = null)
     {
         return new DialogueLineData
         {
             speakerNameOverride = speakerOverride ?? string.Empty,
-            text = lineText ?? string.Empty
+            text = lineText ?? string.Empty,
+            evidenceShownWithLine = evidence
         };
     }
 

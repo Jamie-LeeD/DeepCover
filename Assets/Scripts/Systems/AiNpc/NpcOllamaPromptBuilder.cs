@@ -120,7 +120,9 @@ public sealed class NpcOllamaPromptBuilder
         // Short bracket tags: cheap tokens, still give weaker models a scaffold to follow.
         StringBuilder user = new StringBuilder(2048);
         user.AppendLine("[STATE]");
-        user.Append("suspicion=").Append(context.SuspicionValue.ToString("0.#")).Append("/100 band=").AppendLine(context.SuspicionLevel.ToString());
+        user.Append("trust_suspicion=").Append(context.SuspicionValue.ToString("+0.#;-0.#;0"))
+            .Append(" (-100=max_suspicion, 0=neutral, +100=max_trust) band=")
+            .AppendLine(context.SuspicionLevel.ToString());
         if (!string.IsNullOrWhiteSpace(context.SuspicionDialogueTag))
         {
             user.Append("suspicion_tag=").AppendLine(context.SuspicionDialogueTag);

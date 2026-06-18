@@ -7,19 +7,29 @@ using UnityEngine.Events;
 /// </summary>
 public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialogueContext
 {
-    public const float MinSuspicion = 0f;
-    public const float MaxSuspicion = 100f;
+    public const float MinReputation = -100f;
+    public const float NeutralReputation = 0f;
+    public const float MaxReputation = 100f;
+
+    // Backward-compatible names for existing UI / gameplay scripts.
+    public const float MinSuspicion = MinReputation;
+    public const float MaxSuspicion = MaxReputation;
     private const string SuspicionSaveKey = "DeepCover.Suspicion.Value";
 
     public static SuspicionManager Instance { get; private set; }
 
     [Header("Thresholds")]
-    [SerializeField] private float lowThreshold = 25f;
-    [SerializeField] private float mediumThreshold = 50f;
-    [SerializeField] private float highThreshold = 75f;
-    [SerializeField] private float criticalThreshold = 90f;
+    [Tooltip("Crossing this far left means the player is mildly suspicious.")]
+    [SerializeField] private float lowSuspicionThreshold = -25f;
+    [SerializeField] private float mediumSuspicionThreshold = -50f;
+    [SerializeField] private float highSuspicionThreshold = -75f;
+    [SerializeField] private float criticalSuspicionThreshold = -90f;
+    [Tooltip("Crossing this far right means the player is considered trusted.")]
+    [SerializeField] private float trustedThreshold = 25f;
 
     [Header("Persistence")]
+    [Tooltip("When true, every play session starts at 0 (neutral), ignoring any saved PlayerPrefs value.")]
+    [SerializeField] private bool startNeutralOnAwake = true;
     [SerializeField] private bool loadSavedStateOnAwake = true;
     [SerializeField] private bool saveStateOnChange = true;
 
@@ -28,17 +38,23 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
     [SerializeField] private UnityEvent<SuspicionLevel> onSuspicionLevelChanged;
 
     [Header("Debug")]
-    [SerializeField] private float inspectorSuspicion;
+    [SerializeField] private bool logSuspicionDebug;
+    [SerializeField] private float inspectorReputation;
     [SerializeField] private SuspicionLevel inspectorLevel;
 
-    private float currentSuspicion;
-    private SuspicionLevel currentLevel = SuspicionLevel.Clear;
+    private float currentReputation = NeutralReputation;
+    private SuspicionLevel currentLevel = SuspicionLevel.Neutral;
 
     public event Action<float> SuspicionChanged;
     public event Action<SuspicionLevel> SuspicionLevelChanged;
 
-    public float SuspicionValue => currentSuspicion;
-    public float CurrentSuspicion => currentSuspicion;
+    /// <summary>
+    /// Current trust/suspicion value. -100 = maximum suspicion, 0 = neutral, +100 = maximum trust.
+    /// </summary>
+    public float SuspicionValue => currentReputation;
+    public float CurrentSuspicion => currentReputation;
+    public float ReputationValue => currentReputation;
+    public bool IsAtMaximumSuspicion => currentReputation <= MinReputation + 0.001f;
     public SuspicionLevel CurrentLevel => currentLevel;
 
     private void Awake()
@@ -50,6 +66,13 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
         }
 
         Instance = this;
+        EnsureGameStateManager();
+
+        if (startNeutralOnAwake)
+        {
+            ApplyReputation(NeutralReputation, false);
+            return;
+        }
 
         if (loadSavedStateOnAwake)
         {
@@ -57,7 +80,7 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
             return;
         }
 
-        ApplySuspicion(currentSuspicion, false);
+        ApplyReputation(currentReputation, false);
     }
 
     private void OnDestroy()
@@ -70,12 +93,12 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
 
     private void LateUpdate()
     {
-        inspectorSuspicion = currentSuspicion;
+        inspectorReputation = currentReputation;
         inspectorLevel = currentLevel;
     }
 
     /// <summary>
-    /// Increases global suspicion and clamps the result to the valid range.
+    /// Moves reputation toward suspicion (left on the meter).
     /// </summary>
     public void AddSuspicion(float amount)
     {
@@ -84,11 +107,12 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
             return;
         }
 
-        ApplySuspicion(currentSuspicion + amount, saveStateOnChange);
+        ApplyReputation(currentReputation - amount, saveStateOnChange);
     }
 
     /// <summary>
-    /// Applies a signed delta (positive raises, negative lowers). No-op when zero.
+    /// Applies an existing suspicion-style delta. Positive values increase suspicion (left);
+    /// negative values reduce suspicion / improve trust (right).
     /// </summary>
     public void ApplySuspicionDelta(float delta, bool persistState = true)
     {
@@ -97,17 +121,25 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
             return;
         }
 
-        if (delta > 0f)
-        {
-            ApplySuspicion(currentSuspicion + delta, persistState);
-            return;
-        }
-
-        ApplySuspicion(currentSuspicion + delta, persistState);
+        ApplyReputation(currentReputation - delta, persistState);
     }
 
     /// <summary>
-    /// Decreases global suspicion and clamps the result to the valid range.
+    /// Applies a direct reputation delta. Positive values move right toward trust;
+    /// negative values move left toward suspicion.
+    /// </summary>
+    public void ApplyReputationDelta(float delta, bool persistState = true)
+    {
+        if (Mathf.Approximately(delta, 0f))
+        {
+            return;
+        }
+
+        ApplyReputation(currentReputation + delta, persistState);
+    }
+
+    /// <summary>
+    /// Moves reputation toward trust (right on the meter).
     /// </summary>
     public void ReduceSuspicion(float amount)
     {
@@ -116,15 +148,20 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
             return;
         }
 
-        ApplySuspicion(currentSuspicion - amount, saveStateOnChange);
+        ApplyReputation(currentReputation + amount, saveStateOnChange);
     }
 
     /// <summary>
-    /// Sets suspicion directly. Useful for debugging, cutscenes, and save loading.
+    /// Sets the trust/suspicion value directly. -100 = maximum suspicion, 0 = neutral, +100 = maximum trust.
     /// </summary>
     public void SetSuspicion(float value, bool persistState = true)
     {
-        ApplySuspicion(value, persistState);
+        ApplyReputation(value, persistState);
+    }
+
+    public void SetReputation(float value, bool persistState = true)
+    {
+        ApplyReputation(value, persistState);
     }
 
     /// <summary>
@@ -132,7 +169,7 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
     /// </summary>
     public void SaveState()
     {
-        PlayerPrefs.SetFloat(SuspicionSaveKey, currentSuspicion);
+        PlayerPrefs.SetFloat(SuspicionSaveKey, currentReputation);
         PlayerPrefs.Save();
     }
 
@@ -141,13 +178,13 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
     /// </summary>
     public void LoadState()
     {
-        float savedValue = PlayerPrefs.GetFloat(SuspicionSaveKey, MinSuspicion);
-        ApplySuspicion(savedValue, false);
+        float savedValue = PlayerPrefs.GetFloat(SuspicionSaveKey, NeutralReputation);
+        ApplyReputation(savedValue, false);
     }
 
     public float GetSuspicionValue()
     {
-        return currentSuspicion;
+        return currentReputation;
     }
 
     public SuspicionLevel GetSuspicionLevel()
@@ -163,24 +200,33 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
             SuspicionLevel.Medium => "suspicion_medium",
             SuspicionLevel.High => "suspicion_high",
             SuspicionLevel.Critical => "suspicion_critical",
-            _ => "suspicion_clear"
+            SuspicionLevel.Trusted => "trust_positive",
+            _ => "neutral"
         };
     }
 
-    private void ApplySuspicion(float value, bool persistState)
+    private void ApplyReputation(float value, bool persistState)
     {
-        float clampedValue = Mathf.Clamp(value, MinSuspicion, MaxSuspicion);
+        float clampedValue = Mathf.Clamp(value, MinReputation, MaxReputation);
         SuspicionLevel newLevel = EvaluateLevel(clampedValue);
-        bool valueChanged = !Mathf.Approximately(clampedValue, currentSuspicion);
+        bool valueChanged = !Mathf.Approximately(clampedValue, currentReputation);
         bool levelChanged = newLevel != currentLevel;
 
-        currentSuspicion = clampedValue;
+        currentReputation = clampedValue;
         currentLevel = newLevel;
+
+        if (logSuspicionDebug)
+        {
+            Debug.Log(
+                $"[SuspicionManager] value={currentReputation:0.###}, min/max suspicion threshold={MinReputation:0.###}, " +
+                $"level={currentLevel}, valueChanged={valueChanged}, levelChanged={levelChanged}",
+                this);
+        }
 
         if (valueChanged)
         {
-            SuspicionChanged?.Invoke(currentSuspicion);
-            onSuspicionChanged?.Invoke(currentSuspicion);
+            SuspicionChanged?.Invoke(currentReputation);
+            onSuspicionChanged?.Invoke(currentReputation);
         }
 
         if (levelChanged)
@@ -195,41 +241,67 @@ public class SuspicionManager : MonoBehaviour, ISuspicionReader, ISuspicionDialo
         }
     }
 
-    private SuspicionLevel EvaluateLevel(float suspicionValue)
+    private SuspicionLevel EvaluateLevel(float reputationValue)
     {
-        if (suspicionValue >= criticalThreshold)
+        if (reputationValue <= criticalSuspicionThreshold)
         {
             return SuspicionLevel.Critical;
         }
 
-        if (suspicionValue >= highThreshold)
+        if (reputationValue <= highSuspicionThreshold)
         {
             return SuspicionLevel.High;
         }
 
-        if (suspicionValue >= mediumThreshold)
+        if (reputationValue <= mediumSuspicionThreshold)
         {
             return SuspicionLevel.Medium;
         }
 
-        if (suspicionValue >= lowThreshold)
+        if (reputationValue <= lowSuspicionThreshold)
         {
             return SuspicionLevel.Low;
         }
 
-        return SuspicionLevel.Clear;
+        if (reputationValue >= trustedThreshold)
+        {
+            return SuspicionLevel.Trusted;
+        }
+
+        return SuspicionLevel.Neutral;
+    }
+
+    private void EnsureGameStateManager()
+    {
+        GameStateManager existing = FindFirstObjectByType<GameStateManager>(FindObjectsInactive.Include);
+        if (existing == null)
+        {
+            gameObject.AddComponent<GameStateManager>();
+            return;
+        }
+
+        if (!existing.gameObject.activeSelf)
+        {
+            existing.gameObject.SetActive(true);
+        }
+
+        if (!existing.enabled)
+        {
+            existing.enabled = true;
+        }
     }
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        lowThreshold = Mathf.Clamp(lowThreshold, MinSuspicion, MaxSuspicion);
-        mediumThreshold = Mathf.Clamp(mediumThreshold, lowThreshold, MaxSuspicion);
-        highThreshold = Mathf.Clamp(highThreshold, mediumThreshold, MaxSuspicion);
-        criticalThreshold = Mathf.Clamp(criticalThreshold, highThreshold, MaxSuspicion);
-        currentSuspicion = Mathf.Clamp(currentSuspicion, MinSuspicion, MaxSuspicion);
-        currentLevel = EvaluateLevel(currentSuspicion);
-        inspectorSuspicion = currentSuspicion;
+        lowSuspicionThreshold = Mathf.Clamp(lowSuspicionThreshold, MinReputation, NeutralReputation);
+        mediumSuspicionThreshold = Mathf.Clamp(mediumSuspicionThreshold, MinReputation, lowSuspicionThreshold);
+        highSuspicionThreshold = Mathf.Clamp(highSuspicionThreshold, MinReputation, mediumSuspicionThreshold);
+        criticalSuspicionThreshold = Mathf.Clamp(criticalSuspicionThreshold, MinReputation, highSuspicionThreshold);
+        trustedThreshold = Mathf.Clamp(trustedThreshold, NeutralReputation, MaxReputation);
+        currentReputation = Mathf.Clamp(currentReputation, MinReputation, MaxReputation);
+        currentLevel = EvaluateLevel(currentReputation);
+        inspectorReputation = currentReputation;
         inspectorLevel = currentLevel;
     }
 #endif

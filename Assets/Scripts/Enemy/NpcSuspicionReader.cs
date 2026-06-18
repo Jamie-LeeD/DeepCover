@@ -9,34 +9,44 @@ public class NpcSuspicionReader : MonoBehaviour, ISuspicionReader
     [SerializeField] private UnityEvent<SuspicionLevel> onSuspicionLevelChanged;
     [SerializeField] private UnityEvent<float> onSuspicionValueChanged;
 
+    private bool subscribed;
+
     public float SuspicionValue => SuspicionManager.Instance != null
         ? SuspicionManager.Instance.SuspicionValue
         : 0f;
 
     public SuspicionLevel CurrentLevel => SuspicionManager.Instance != null
         ? SuspicionManager.Instance.CurrentLevel
-        : SuspicionLevel.Clear;
+        : SuspicionLevel.Neutral;
 
     private void OnEnable()
     {
-        if (SuspicionManager.Instance == null)
-        {
-            return;
-        }
+        TrySubscribe();
+    }
 
-        SuspicionManager.Instance.SuspicionChanged += HandleSuspicionChanged;
-        SuspicionManager.Instance.SuspicionLevelChanged += HandleSuspicionLevelChanged;
+    private void Start()
+    {
+        TrySubscribe();
+    }
+
+    private void Update()
+    {
+        if (!subscribed)
+        {
+            TrySubscribe();
+        }
     }
 
     private void OnDisable()
     {
-        if (SuspicionManager.Instance == null)
+        if (!subscribed || SuspicionManager.Instance == null)
         {
             return;
         }
 
         SuspicionManager.Instance.SuspicionChanged -= HandleSuspicionChanged;
         SuspicionManager.Instance.SuspicionLevelChanged -= HandleSuspicionLevelChanged;
+        subscribed = false;
     }
 
     /// <summary>
@@ -60,5 +70,17 @@ public class NpcSuspicionReader : MonoBehaviour, ISuspicionReader
     private void HandleSuspicionLevelChanged(SuspicionLevel level)
     {
         onSuspicionLevelChanged?.Invoke(level);
+    }
+
+    private void TrySubscribe()
+    {
+        if (subscribed || SuspicionManager.Instance == null)
+        {
+            return;
+        }
+
+        SuspicionManager.Instance.SuspicionChanged += HandleSuspicionChanged;
+        SuspicionManager.Instance.SuspicionLevelChanged += HandleSuspicionLevelChanged;
+        subscribed = true;
     }
 }

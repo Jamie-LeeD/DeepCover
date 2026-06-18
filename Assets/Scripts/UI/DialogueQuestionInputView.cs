@@ -36,6 +36,8 @@ public class DialogueQuestionInputView : MonoBehaviour
 
     private Action<string> pendingSubmit;
     private Action pendingCancel;
+    private Graphic[] raycastGraphics;
+    private bool[] raycastGraphicDefaults;
 
     private void Awake()
     {
@@ -63,12 +65,22 @@ public class DialogueQuestionInputView : MonoBehaviour
         FocusInputField();
     }
 
+    /// <summary>True while a question session is active, even if another modal temporarily owns clicks.</summary>
+    public bool IsSessionActive =>
+        pendingSubmit != null || pendingCancel != null;
+
     /// <summary>Hides the panel and clears session callbacks.</summary>
     public void Hide()
     {
         pendingSubmit = null;
         pendingCancel = null;
         SetRootVisible(false);
+    }
+
+    /// <summary>Invokes the cancel callback (e.g. Escape via <see cref="GameplayPauseController"/>).</summary>
+    public void CancelSession()
+    {
+        HandleCancelClicked();
     }
 
     /// <summary>Current trimmed text in the question field (empty if missing).</summary>
@@ -100,6 +112,41 @@ public class DialogueQuestionInputView : MonoBehaviour
     public void EndSessionSilently()
     {
         Hide();
+    }
+
+    public void SetRaycastBlocking(bool blocking)
+    {
+        if (rootGroup == null || !IsSessionActive)
+        {
+            return;
+        }
+
+        rootGroup.blocksRaycasts = blocking;
+        rootGroup.interactable = blocking;
+
+        CacheRaycastGraphics();
+        for (int i = 0; i < raycastGraphics.Length; i++)
+        {
+            if (raycastGraphics[i] != null)
+            {
+                raycastGraphics[i].raycastTarget = blocking && raycastGraphicDefaults[i];
+            }
+        }
+    }
+
+    private void CacheRaycastGraphics()
+    {
+        if (raycastGraphics != null)
+        {
+            return;
+        }
+
+        raycastGraphics = GetComponentsInChildren<Graphic>(true);
+        raycastGraphicDefaults = new bool[raycastGraphics.Length];
+        for (int i = 0; i < raycastGraphics.Length; i++)
+        {
+            raycastGraphicDefaults[i] = raycastGraphics[i] != null && raycastGraphics[i].raycastTarget;
+        }
     }
 
     private void WireButtonListeners()

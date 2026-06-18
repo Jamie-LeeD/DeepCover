@@ -20,4 +20,6 @@ MonoBehaviour:
 '
   icon: {fileID: 0}
   category: 0
+  suspicionModifier: -20
+  suspicionTone: 1
   evidenceId: archive_prediction_report

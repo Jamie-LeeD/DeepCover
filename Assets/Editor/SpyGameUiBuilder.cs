@@ -247,34 +247,50 @@ public static class SpyGameUiBuilder
         headerRt.anchoredPosition = new Vector2(8f, -6f);
         header = headerGo.GetComponent<TextMeshProUGUI>();
         ApplyDefaultFontPublic(header);
-        header.text = "SUSPICION";
+        header.text = "TRUST  |  SUSPICION";
         header.fontSize = 14f;
         header.alignment = TextAlignmentOptions.Left;
         header.color = new Color(0.65f, 0.78f, 0.86f, 0.9f);
         header.fontStyle = FontStyles.Bold;
 
-        GameObject sliderGo = DefaultControls.CreateSlider(CreateUiResourcesPublic());
-        sliderGo.name = "SuspicionSlider";
-        Undo.RegisterCreatedObjectUndo(sliderGo, "Suspicion Slider");
-        Undo.SetTransformParent(sliderGo.transform, root.transform, "Suspicion Slider Parent");
-        RectTransform sliderRt = sliderGo.GetComponent<RectTransform>();
-        sliderRt.anchorMin = new Vector2(0f, 0f);
-        sliderRt.anchorMax = new Vector2(1f, 1f);
-        sliderRt.offsetMin = new Vector2(12f, 10f);
-        sliderRt.offsetMax = new Vector2(-12f, -30f);
+        GameObject trackGo = new GameObject("TrustSuspicionTrack", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        Undo.RegisterCreatedObjectUndo(trackGo, "Create Trust Suspicion Track");
+        Undo.SetTransformParent(trackGo.transform, root.transform, "Trust Suspicion Track Parent");
+        RectTransform trackRt = trackGo.GetComponent<RectTransform>();
+        trackRt.anchorMin = new Vector2(0f, 0.5f);
+        trackRt.anchorMax = new Vector2(1f, 0.5f);
+        trackRt.pivot = new Vector2(0.5f, 0.5f);
+        trackRt.offsetMin = new Vector2(14f, -8f);
+        trackRt.offsetMax = new Vector2(-14f, 8f);
+        Image trackImage = trackGo.GetComponent<Image>();
+        trackImage.color = new Color(0.12f, 0.16f, 0.2f, 0.95f);
+        trackImage.raycastTarget = false;
 
-        Slider slider = sliderGo.GetComponent<Slider>();
-        slider.minValue = 0f;
-        slider.maxValue = 1f;
-        slider.interactable = false;
-        Transform fillArea = sliderGo.transform.Find("Fill Area");
-        Image fillImage = fillArea != null ? fillArea.Find("Fill")?.GetComponent<Image>() : null;
-        if (fillImage != null)
-        {
-            fillImage.type = Image.Type.Filled;
-            fillImage.fillMethod = Image.FillMethod.Horizontal;
-            fillImage.color = new Color(0.95f, 0.45f, 0.2f, 0.95f);
-        }
+        GameObject centerGo = new GameObject("NeutralCenterMarker", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        Undo.RegisterCreatedObjectUndo(centerGo, "Create Neutral Center Marker");
+        Undo.SetTransformParent(centerGo.transform, trackGo.transform, "Neutral Center Marker Parent");
+        RectTransform centerRt = centerGo.GetComponent<RectTransform>();
+        centerRt.anchorMin = new Vector2(0.5f, 0.5f);
+        centerRt.anchorMax = new Vector2(0.5f, 0.5f);
+        centerRt.pivot = new Vector2(0.5f, 0.5f);
+        centerRt.sizeDelta = new Vector2(3f, 28f);
+        centerRt.anchoredPosition = Vector2.zero;
+        Image centerImage = centerGo.GetComponent<Image>();
+        centerImage.color = new Color(0.75f, 0.82f, 0.85f, 1f);
+        centerImage.raycastTarget = false;
+
+        GameObject indicatorGo = new GameObject("TrustSuspicionIndicator", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        Undo.RegisterCreatedObjectUndo(indicatorGo, "Create Trust Suspicion Indicator");
+        Undo.SetTransformParent(indicatorGo.transform, trackGo.transform, "Trust Suspicion Indicator Parent");
+        RectTransform indicatorRt = indicatorGo.GetComponent<RectTransform>();
+        indicatorRt.anchorMin = new Vector2(0.5f, 0.5f);
+        indicatorRt.anchorMax = new Vector2(0.5f, 0.5f);
+        indicatorRt.pivot = new Vector2(0.5f, 0.5f);
+        indicatorRt.sizeDelta = new Vector2(12f, 34f);
+        indicatorRt.anchoredPosition = Vector2.zero;
+        Image indicatorImage = indicatorGo.GetComponent<Image>();
+        indicatorImage.color = new Color(0.75f, 0.82f, 0.85f, 1f);
+        indicatorImage.raycastTarget = false;
 
         GameObject levelGo = new GameObject("LevelLabel", typeof(RectTransform), typeof(TextMeshProUGUI));
         Undo.RegisterCreatedObjectUndo(levelGo, "Suspicion Level");
@@ -283,23 +299,41 @@ public static class SpyGameUiBuilder
         levelRt.anchorMin = new Vector2(1f, 1f);
         levelRt.anchorMax = new Vector2(1f, 1f);
         levelRt.pivot = new Vector2(1f, 1f);
-        levelRt.sizeDelta = new Vector2(120f, 22f);
+        levelRt.sizeDelta = new Vector2(150f, 22f);
         levelRt.anchoredPosition = new Vector2(-8f, -6f);
         TextMeshProUGUI levelTmp = levelGo.GetComponent<TextMeshProUGUI>();
         ApplyDefaultFontPublic(levelTmp);
-        levelTmp.text = "Clear";
+        levelTmp.text = "Neutral";
         levelTmp.fontSize = 13f;
         levelTmp.alignment = TextAlignmentOptions.Right;
         levelTmp.color = new Color(0.85f, 0.9f, 0.95f, 0.95f);
 
+        GameObject valueGo = new GameObject("ValueLabel", typeof(RectTransform), typeof(TextMeshProUGUI));
+        Undo.RegisterCreatedObjectUndo(valueGo, "Suspicion Value");
+        Undo.SetTransformParent(valueGo.transform, root.transform, "Suspicion Value Parent");
+        RectTransform valueRt = valueGo.GetComponent<RectTransform>();
+        valueRt.anchorMin = new Vector2(0f, 0f);
+        valueRt.anchorMax = new Vector2(0f, 0f);
+        valueRt.pivot = new Vector2(0f, 0f);
+        valueRt.sizeDelta = new Vector2(80f, 22f);
+        valueRt.anchoredPosition = new Vector2(12f, 8f);
+        TextMeshProUGUI valueTmp = valueGo.GetComponent<TextMeshProUGUI>();
+        ApplyDefaultFontPublic(valueTmp);
+        valueTmp.text = "0";
+        valueTmp.fontSize = 13f;
+        valueTmp.alignment = TextAlignmentOptions.Left;
+        valueTmp.color = new Color(0.85f, 0.9f, 0.95f, 0.95f);
+
         controller = Undo.AddComponent<SuspicionUIController>(root);
-        bar = Undo.AddComponent<SuspicionBarUI>(sliderGo);
+        bar = Undo.AddComponent<SuspicionBarUI>(root);
 
         BindSerializedPublic(
             bar,
-            ("suspicionSlider", slider),
-            ("fillImage", fillImage),
+            ("trackRect", trackRt),
+            ("indicatorRect", indicatorRt),
+            ("centerMarkerRect", centerRt),
             ("levelLabel", levelTmp),
+            ("valueLabel", valueTmp),
             ("hideWhenClear", false));
     }
 

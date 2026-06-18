@@ -8,10 +8,23 @@ public class EvidencePickupInteractable : MonoBehaviour, IInteractable
 {
     [SerializeField] private EvidenceData evidence;
     [SerializeField] private bool destroyOnPickup = true;
+    [SerializeField] private bool hideWhenAlreadyCollected = true;
     [SerializeField] private UnityEvent<EvidenceData> onCollected;
     [SerializeField] private UnityEvent<EvidenceData> onAlreadyOwned;
 
     private bool consumed;
+
+    private void Start()
+    {
+        if (hideWhenAlreadyCollected &&
+            evidence != null &&
+            EvidenceInventory.Instance != null &&
+            EvidenceInventory.Instance.HasEvidence(evidence))
+        {
+            consumed = true;
+            gameObject.SetActive(false);
+        }
+    }
 
     public string GetInteractionPrompt()
     {
@@ -25,7 +38,12 @@ public class EvidencePickupInteractable : MonoBehaviour, IInteractable
 
     public bool CanInteract(GameObject interactor)
     {
-        return !consumed && evidence != null;
+        if (consumed || evidence == null)
+        {
+            return false;
+        }
+
+        return EvidenceInventory.Instance == null || !EvidenceInventory.Instance.HasEvidence(evidence);
     }
 
     public void Interact(GameObject interactor)

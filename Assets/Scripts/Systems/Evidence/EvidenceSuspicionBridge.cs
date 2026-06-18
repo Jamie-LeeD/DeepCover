@@ -63,10 +63,12 @@ public class EvidenceSuspicionBridge : MonoBehaviour
             return;
         }
 
-        string direction = evidence.SuspicionModifier > 0f ? "increased" : "lowered";
+        string direction = evidence.SuspicionModifier > 0f
+            ? "moved toward suspicion"
+            : "moved toward trust";
         Debug.Log(
             $"[EvidenceSuspicion] Collected '{evidence.DisplayName}' ({evidence.EvidenceId}) — " +
-            $"suspicion {direction} by {Mathf.Abs(evidence.SuspicionModifier):0.#} " +
+            $"reputation {direction} by {Mathf.Abs(evidence.SuspicionModifier):0.#} " +
             $"({before:0.#} → {after:0.#}, band {suspicion.CurrentLevel}, tone {evidence.GetSuspicionContextTag()}).",
             evidence);
     }

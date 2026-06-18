@@ -13,6 +13,8 @@ using UnityEngine.UI;
 public static class SpyGameSceneArchitectureValidator
 {
     private const string QuestionPanelName = "DialogueQuestionInputView";
+    private const string PausePanelName = "PauseMenuView";
+    private const string EvidenceJournalName = "EvidenceJournal";
 
     [MenuItem("Tools/Spy Game/Validate Scene Architecture", priority = 200)]
     public static void ValidateSceneMenu()
@@ -96,6 +98,14 @@ public static class SpyGameSceneArchitectureValidator
             report.Errors.Add("No Canvas in scene.");
         }
 
+        EvidenceInventoryUI evidenceJournal = Object.FindFirstObjectByType<EvidenceInventoryUI>(
+            FindObjectsInactive.Include);
+        if (evidenceJournal == null)
+        {
+            report.Errors.Add(
+                $"Missing '{EvidenceJournalName}' UI. Run Tools → Add Evidence Journal To Scene.");
+        }
+
         DialogueQuestionInputView questionView = Object.FindFirstObjectByType<DialogueQuestionInputView>(
             FindObjectsInactive.Include);
         if (questionView == null)
@@ -155,6 +165,28 @@ public static class SpyGameSceneArchitectureValidator
             ValidateHudManager(hud, report);
         }
 
+        GameplayPauseController pauseController = Object.FindFirstObjectByType<GameplayPauseController>(
+            FindObjectsInactive.Include);
+        PauseMenuView pauseView = Object.FindFirstObjectByType<PauseMenuView>(FindObjectsInactive.Include);
+        if (pauseController == null)
+        {
+            report.Errors.Add(
+                "No GameplayPauseController in scene. Run Tools → Add Pause Menu To Scene.");
+        }
+        else if (pauseView == null)
+        {
+            report.Errors.Add(
+                $"GameplayPauseController exists but '{PausePanelName}' UI is missing. Run Tools → Add Pause Menu To Scene.");
+        }
+        else
+        {
+            SerializedObject pauseSo = new SerializedObject(pauseController);
+            if (pauseSo.FindProperty("pauseMenuView").objectReferenceValue == null)
+            {
+                report.Warnings.Add("GameplayPauseController.pauseMenuView is not assigned.");
+            }
+        }
+
         return report;
     }
 
@@ -180,6 +212,57 @@ public static class SpyGameSceneArchitectureValidator
                 DialogueQuestionInputViewEditor.AutoWire(questionView);
                 count++;
                 Debug.Log("[SpyGameValidator] Created DialogueQuestionInputView under existing canvas.");
+            }
+        }
+
+        GameplayPauseController pauseController = Object.FindFirstObjectByType<GameplayPauseController>(
+            FindObjectsInactive.Include);
+        PauseMenuView pauseView = Object.FindFirstObjectByType<PauseMenuView>(FindObjectsInactive.Include);
+        if (pauseView == null)
+        {
+            Canvas canvas = Object.FindFirstObjectByType<SpyGameUiRootMarker>()?.GetComponent<Canvas>();
+            if (canvas == null)
+            {
+                canvas = Object.FindFirstObjectByType<Canvas>();
+            }
+
+            if (canvas != null)
+            {
+                pauseView = PauseMenuBuilder.BuildPauseMenu(canvas.transform);
+                pauseController = pauseController ?? PauseMenuBuilder.EnsurePauseControllerPublic();
+                PauseMenuBuilder.WireControllerPublic(pauseController, pauseView);
+                count++;
+                Debug.Log("[SpyGameValidator] Created PauseMenuView and wired GameplayPauseController.");
+            }
+        }
+        else if (pauseController != null)
+        {
+            SerializedObject pauseSo = new SerializedObject(pauseController);
+            if (pauseSo.FindProperty("pauseMenuView").objectReferenceValue == null)
+            {
+                pauseSo.FindProperty("pauseMenuView").objectReferenceValue = pauseView;
+                pauseSo.ApplyModifiedProperties();
+                EditorUtility.SetDirty(pauseController);
+                count++;
+            }
+        }
+
+        EvidenceInventoryUI evidenceJournal = Object.FindFirstObjectByType<EvidenceInventoryUI>(
+            FindObjectsInactive.Include);
+        if (evidenceJournal == null)
+        {
+            Canvas canvas = Object.FindFirstObjectByType<SpyGameUiRootMarker>()?.GetComponent<Canvas>();
+            if (canvas == null)
+            {
+                canvas = Object.FindFirstObjectByType<Canvas>();
+            }
+
+            if (canvas != null)
+            {
+                EvidenceJournalBuilder.EnsureEvidenceInventory();
+                EvidenceJournalBuilder.BuildJournal(canvas.transform);
+                count++;
+                Debug.Log("[SpyGameValidator] Created EvidenceJournal under existing canvas.");
             }
         }
 

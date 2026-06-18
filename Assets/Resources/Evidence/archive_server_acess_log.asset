@@ -17,4 +17,6 @@ MonoBehaviour:
     at 02:14 despite officially reporting he was off-site during the system breach.
   icon: {fileID: 0}
   category: 0
+  suspicionModifier: -20
+  suspicionTone: 1
   evidenceId: archive_server_access_log

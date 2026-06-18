@@ -2,10 +2,11 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Read-only access to the global suspicion value and current band.
+/// Read-only access to the global trust/suspicion value and current band.
 /// </summary>
 public interface ISuspicionReader
 {
+    /// <summary>-100 = maximum suspicion, 0 = neutral, +100 = maximum trust.</summary>
     float SuspicionValue { get; }
     SuspicionLevel CurrentLevel { get; }
 }

@@ -2723,7 +2723,7 @@ Light:
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 5000
+  m_ColorTemperature: 7792
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
@@ -2742,13 +2742,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5130,6 +5130,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EvidencePickupInteractable
   evidence: {fileID: 11400000, guid: 11ec76cf2b707f042bf43aba0c8d10fd, type: 2}
   destroyOnPickup: 1
+  hideWhenAlreadyCollected: 1
   onCollected:
     m_PersistentCalls:
       m_Calls: []
@@ -6226,17 +6227,17 @@ MonoBehaviour:
   m_MoveRepeatDelay: 0.5
   m_MoveRepeatRate: 0.1
   m_XRTrackingOrigin: {fileID: 0}
-  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_PointAction: {fileID: -1654692200621890270, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_MoveAction: {fileID: -8784545083839296357, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_SubmitAction: {fileID: 392368643174621059, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_CancelAction: {fileID: 7727032971491509709, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_MiddleClickAction: {fileID: -2185481485913320682, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_RightClickAction: {fileID: -4090225696740746782, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
@@ -7791,6 +7792,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EvidencePickupInteractable
   evidence: {fileID: 11400000, guid: eb35125597da90344b27f651b23645d7, type: 2}
   destroyOnPickup: 0
+  hideWhenAlreadyCollected: 1
   onCollected:
     m_PersistentCalls:
       m_Calls: []
@@ -10381,15 +10383,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9144078c11e56c14b80a3f2245416e83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SuspicionBarUI
+  trackRect: {fileID: 0}
+  indicatorRect: {fileID: 0}
+  centerMarkerRect: {fileID: 0}
+  indicatorSmoothTime: 0.08
   suspicionSlider: {fileID: 1801362975}
   fillImage: {fileID: 1994873763}
   levelLabel: {fileID: 188796461}
+  valueLabel: {fileID: 0}
   hideWhenClear: 0
-  clearColor: {r: 0.2, g: 0.8, b: 0.3, a: 1}
-  lowColor: {r: 0.9, g: 0.85, b: 0.2, a: 1}
-  mediumColor: {r: 1, g: 0.6, b: 0.1, a: 1}
-  highColor: {r: 1, g: 0.35, b: 0.1, a: 1}
-  criticalColor: {r: 0.9, g: 0.1, b: 0.1, a: 1}
+  neutralColor: {r: 0.75, g: 0.82, b: 0.85, a: 1}
+  trustColor: {r: 0.2, g: 0.8, b: 0.45, a: 1}
+  lowSuspicionColor: {r: 0.9, g: 0.85, b: 0.2, a: 1}
+  mediumSuspicionColor: {r: 1, g: 0.6, b: 0.1, a: 1}
+  highSuspicionColor: {r: 1, g: 0.35, b: 0.1, a: 1}
+  criticalSuspicionColor: {r: 0.9, g: 0.1, b: 0.1, a: 1}
 --- !u!114 &1801362975
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10555,6 +10563,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EvidencePickupInteractable
   evidence: {fileID: 11400000, guid: 7c8d4187d5f185a498ecd8b14f572271, type: 2}
   destroyOnPickup: 1
+  hideWhenAlreadyCollected: 1
   onCollected:
     m_PersistentCalls:
       m_Calls: []
@@ -11808,10 +11817,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2c948025106e4c44a5c3e1302a5e467, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SuspicionManager
-  lowThreshold: 25
-  mediumThreshold: 50
-  highThreshold: 75
-  criticalThreshold: 90
+  lowSuspicionThreshold: -25
+  mediumSuspicionThreshold: -50
+  highSuspicionThreshold: -75
+  criticalSuspicionThreshold: -90
+  trustedThreshold: 25
+  startNeutralOnAwake: 1
   loadSavedStateOnAwake: 1
   saveStateOnChange: 1
   onSuspicionChanged:
@@ -11820,8 +11831,8 @@ MonoBehaviour:
   onSuspicionLevelChanged:
     m_PersistentCalls:
       m_Calls: []
-  inspectorSuspicion: 0
-  inspectorLevel: 0
+  inspectorReputation: 0
+  inspectorLevel: -1
 --- !u!1 &2009956471
 GameObject:
   m_ObjectHideFlags: 0
@@ -12366,6 +12377,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EvidencePickupInteractable
   evidence: {fileID: 11400000, guid: 2220ff933c952f64f9ba98699fc222d0, type: 2}
   destroyOnPickup: 0
+  hideWhenAlreadyCollected: 1
   onCollected:
     m_PersistentCalls:
       m_Calls: []
@@ -12531,6 +12543,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EvidencePickupInteractable
   evidence: {fileID: 11400000, guid: 030ff310cb4db3041a001a548a51b838, type: 2}
   destroyOnPickup: 0
+  hideWhenAlreadyCollected: 1
   onCollected:
     m_PersistentCalls:
       m_Calls: []

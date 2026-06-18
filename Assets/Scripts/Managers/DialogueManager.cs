@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
-
 /// <summary>
 /// Global dialogue flow controller for scripted and runtime conversations.
+/// Escape handling is centralized on <see cref="GameplayPauseController"/> (close dialogue before pause).
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
@@ -72,19 +71,6 @@ public class DialogueManager : MonoBehaviour
         if (Instance == this)
         {
             Instance = null;
-        }
-    }
-
-    private void Update()
-    {
-        if (!isDialogueActive)
-        {
-            return;
-        }
-
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            CloseDialogue();
         }
     }
 

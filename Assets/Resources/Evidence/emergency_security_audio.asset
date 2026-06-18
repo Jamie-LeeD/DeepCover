@@ -18,4 +18,6 @@ MonoBehaviour:
     the facility.
   icon: {fileID: 0}
   category: 4
+  suspicionModifier: -20
+  suspicionTone: 1
   evidenceId: emergency_security_audio
