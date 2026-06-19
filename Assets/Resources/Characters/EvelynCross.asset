@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCProfile
   characterDisplayName: EvelynCross
   roleTitle: CEO of Helix Dynamics
+  isAccusable: 1
+  suspectID: EvelynCross
+  accusationDisplayName: EvelynCross
   personality: 'Extremely intelligent, calm under pressure, emotionally controlled,
     strategic thinker. Speaks with confidence and precision. Rarely raises her voice.
     Treats conversations like negotiations.
@@ -29,3 +32,19 @@ MonoBehaviour:
     Reed fully.
   startingTrust: 30
   fallbackLineOnAiFailure: "You\u2019re asking dangerous questions."
+  evidenceResponses:
+  - evidenceItem: {fileID: 11400000, guid: 030ff310cb4db3041a001a548a51b838, type: 2}
+    requiredTrustLevel: 50
+    secretRevealed: Evelyn had not know what ARCHIVE had been doing until Marcus
+      confronted her.
+    successDialogue: I.. I had no clue it had gone so far, Marcus was right.
+    failureDialogue: How did you get this, your not authorized to have this.
+    suspicionPenalty: 50
+    hasBeenRevealed: 0
+  - evidenceItem: {fileID: 11400000, guid: 11ec76cf2b707f042bf43aba0c8d10fd, type: 2}
+    requiredTrustLevel: 10
+    secretRevealed: Evelyn is surprised that the test was done.
+    successDialogue: Where did you get this, I did not issue this test.
+    failureDialogue: Thank you for reporting this test to me.
+    suspicionPenalty: 20
+    hasBeenRevealed: 0

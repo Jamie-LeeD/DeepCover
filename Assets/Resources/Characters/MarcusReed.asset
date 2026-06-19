@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCProfile
   characterDisplayName: Marcus Reed
   roleTitle: Director of Security
+  isAccusable: 1
+  suspectID: Marcus Reed
+  accusationDisplayName: Marcus Reed
   personality: Aggressive, observant, intimidating, military background. Constantly
     evaluating threats. Distrustful of everyone. Speaks bluntly and often challenges
     the player directly.
@@ -25,3 +28,11 @@ MonoBehaviour:
     because he fears Evelyn Cross is losing control of the project.
   startingTrust: 15
   fallbackLineOnAiFailure: "Conversation\u2019s over."
+  evidenceResponses:
+  - evidenceItem: {fileID: 11400000, guid: 2220ff933c952f64f9ba98699fc222d0, type: 2}
+    requiredTrustLevel: 30
+    secretRevealed: Marcus is happy that Evelynn is taking action.
+    successDialogue: 'She listened to me, she knows that Archive is dangerous '
+    failureDialogue: How did you get this, you faked this, I want you out of my office.
+    suspicionPenalty: 0
+    hasBeenRevealed: 0

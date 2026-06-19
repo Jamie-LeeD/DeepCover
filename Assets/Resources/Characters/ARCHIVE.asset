@@ -36,9 +36,37 @@ MonoBehaviour:
   fallbackLineOnAiFailure: Input insufficient.
   evidenceResponses:
   - evidenceItem: {fileID: 11400000, guid: 7c8d4187d5f185a498ecd8b14f572271, type: 2}
-    requiredTrustLevel: 100
-    secretRevealed: this is the secret
-    successDialogue: success
-    failureDialogue: failure
-    suspicionPenalty: 50
+    requiredTrustLevel: 0
+    secretRevealed: Dr Evelyn pushed for the test be down without consent
+    successDialogue: 'It was Evelyn Cross who issued for the test to be done. '
+    failureDialogue: This is private information.
+    suspicionPenalty: 20
+    hasBeenRevealed: 0
+  - evidenceItem: {fileID: 11400000, guid: 11ec76cf2b707f042bf43aba0c8d10fd, type: 2}
+    requiredTrustLevel: 0
+    secretRevealed: Test done straight after your joined the company.
+    successDialogue: This report was recently issued after you joined the company.
+    failureDialogue: This is private information
+    suspicionPenalty: 20
+    hasBeenRevealed: 0
+  - evidenceItem: {fileID: 11400000, guid: eb35125597da90344b27f651b23645d7, type: 2}
+    requiredTrustLevel: 0
+    secretRevealed: Marcus is suspicious of Archive
+    successDialogue: Marcuss accessed my logs on his off time.
+    failureDialogue: This is private information
+    suspicionPenalty: 20
+    hasBeenRevealed: 0
+  - evidenceItem: {fileID: 11400000, guid: 030ff310cb4db3041a001a548a51b838, type: 2}
+    requiredTrustLevel: 0
+    secretRevealed: Marcus knows that Evelyn Cross is hiding something about ARCHIVE
+    successDialogue: Marcus did not like what Evelyn cross was doing.
+    failureDialogue: This is private information
+    suspicionPenalty: 20
+    hasBeenRevealed: 0
+  - evidenceItem: {fileID: 11400000, guid: 2220ff933c952f64f9ba98699fc222d0, type: 2}
+    requiredTrustLevel: 0
+    secretRevealed: Evelynn Cross is aware that the ARCHIVE is going rogue.
+    successDialogue: Evelynn Cross is in response with senior executives
+    failureDialogue: This is private information
+    suspicionPenalty: 20
     hasBeenRevealed: 0

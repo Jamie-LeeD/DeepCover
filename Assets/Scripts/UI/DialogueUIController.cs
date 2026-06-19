@@ -9,6 +9,8 @@ using UnityEngine.UI;
 /// </summary>
 public class DialogueUIController : MonoBehaviour
 {
+    private static readonly Color LightButtonTextColor = new Color(0f, 0.2f, 0.4f, 1f);
+
     [Header("Core view")]
     [SerializeField] private DialogueUIView dialogueView;
 
@@ -538,7 +540,7 @@ public class DialogueUIController : MonoBehaviour
         tmp.fontSize = 14f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.characterSpacing = 1.5f;
-        tmp.color = Color.white;
+        tmp.color = LightButtonTextColor;
         tmp.alignment = TextAlignmentOptions.Center;
 
         return go.GetComponent<Button>();

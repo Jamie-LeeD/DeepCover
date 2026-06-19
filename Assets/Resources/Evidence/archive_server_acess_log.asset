@@ -15,8 +15,8 @@ MonoBehaviour:
   displayName: ARCHIVE Server Access Log
   description: Security records show Marcus Reed accessed the ARCHIVE server room
     at 02:14 despite officially reporting he was off-site during the system breach.
-  icon: {fileID: 0}
-  category: 0
+  icon: {fileID: 21300000, guid: 770565c6d3bd9b94d8c3e5695cba332e, type: 3}
+  category: 8
   suspicionModifier: -20
   suspicionTone: 1
   evidenceId: archive_server_access_log

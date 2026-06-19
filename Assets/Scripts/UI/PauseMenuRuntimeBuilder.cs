@@ -11,6 +11,7 @@ using UnityEngine.UI;
 public static class PauseMenuRuntimeBuilder
 {
     private const string RootName = "PauseMenuView";
+    private static readonly Color LightButtonTextColor = new Color(0f, 0.2f, 0.4f, 1f);
 
     public static PauseMenuView CreateOrGet()
     {
@@ -51,7 +52,7 @@ public static class PauseMenuRuntimeBuilder
         RectTransform panelRt = panel.GetComponent<RectTransform>();
         panelRt.anchorMin = panelRt.anchorMax = new Vector2(0.5f, 0.5f);
         panelRt.pivot = new Vector2(0.5f, 0.5f);
-        panelRt.sizeDelta = new Vector2(420f, 280f);
+        panelRt.sizeDelta = new Vector2(420f, 350f);
 
         Image panelImage = panel.GetComponent<Image>();
         panelImage.color = new Color(0.05f, 0.08f, 0.12f, 0.96f);
@@ -72,12 +73,75 @@ public static class PauseMenuRuntimeBuilder
         Button resume = CreateButton(panel.transform, "ResumeButton", "RESUME", out _);
         AddLayout(resume.gameObject, 54f);
 
+        Button controls = CreateButton(panel.transform, "ControlsButton", "CONTROLS", out _);
+        AddLayout(controls.gameObject, 54f);
+
         Button mainMenu = CreateButton(panel.transform, "MainMenuButton", "MAIN MENU", out _);
         AddLayout(mainMenu.gameObject, 54f);
 
+        GameObject controlsPanel = BuildControlsPanel(root.transform, out Button closeControls);
+
         PauseMenuView view = root.AddComponent<PauseMenuView>();
-        view.RuntimeSetReferences(rootGroup, resume, mainMenu, title);
+        view.RuntimeSetReferences(rootGroup, panel, controlsPanel, resume, controls, mainMenu, closeControls, title);
         return view;
+    }
+
+    private static GameObject BuildControlsPanel(Transform parent, out Button closeButton)
+    {
+        GameObject panel = new GameObject("ControlsMenuPanel", typeof(RectTransform), typeof(Image));
+        panel.transform.SetParent(parent, false);
+        RectTransform panelRt = panel.GetComponent<RectTransform>();
+        panelRt.anchorMin = panelRt.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRt.pivot = new Vector2(0.5f, 0.5f);
+        panelRt.sizeDelta = new Vector2(560f, 460f);
+
+        Image panelImage = panel.GetComponent<Image>();
+        panelImage.color = new Color(0.05f, 0.08f, 0.12f, 0.96f);
+
+        Outline outline = panel.AddComponent<Outline>();
+        outline.effectColor = new Color(0.35f, 0.62f, 0.72f, 0.5f);
+        outline.effectDistance = new Vector2(2f, -2f);
+
+        TextMeshProUGUI title = CreateLabel(panel.transform, "ControlsTitle", "CONTROLS", 28f, FontStyles.Bold);
+        RectTransform titleRt = title.GetComponent<RectTransform>();
+        titleRt.anchorMin = titleRt.anchorMax = new Vector2(0.5f, 1f);
+        titleRt.pivot = new Vector2(0.5f, 1f);
+        titleRt.anchoredPosition = new Vector2(0f, -34f);
+        titleRt.sizeDelta = new Vector2(460f, 48f);
+        title.characterSpacing = 4f;
+
+        TextMeshProUGUI controlsText = CreateLabel(
+            panel.transform,
+            "ControlsList",
+            "W - Move Forward\n" +
+            "A - Move Left\n" +
+            "S - Move Backward\n" +
+            "D - Move Right\n\n" +
+            "E - Interact with Objects and NPCs\n" +
+            "I - Open Evidence Journal\n" +
+            "ESC - Open/Close Pause Menu\n" +
+            "Mouse Movement - Look Around",
+            18f,
+            FontStyles.Normal);
+        RectTransform controlsRt = controlsText.GetComponent<RectTransform>();
+        controlsRt.anchorMin = controlsRt.anchorMax = new Vector2(0.5f, 0.5f);
+        controlsRt.pivot = new Vector2(0.5f, 0.5f);
+        controlsRt.anchoredPosition = new Vector2(0f, -16f);
+        controlsRt.sizeDelta = new Vector2(460f, 300f);
+        controlsText.alignment = TextAlignmentOptions.Left;
+        controlsText.color = new Color(0.92f, 0.95f, 0.98f, 1f);
+        controlsText.textWrappingMode = TextWrappingModes.Normal;
+
+        closeButton = CreateButton(panel.transform, "CloseControlsButton", "X", out TextMeshProUGUI closeLabel);
+        closeLabel.fontSize = 18f;
+        RectTransform closeRt = closeButton.GetComponent<RectTransform>();
+        closeRt.anchorMin = closeRt.anchorMax = new Vector2(1f, 1f);
+        closeRt.pivot = new Vector2(1f, 1f);
+        closeRt.anchoredPosition = new Vector2(-16f, -16f);
+        closeRt.sizeDelta = new Vector2(42f, 36f);
+
+        panel.SetActive(false);
+        return panel;
     }
 
     private static Canvas ResolveCanvas()
@@ -157,7 +221,7 @@ public static class PauseMenuRuntimeBuilder
         label.text = text;
         label.fontSize = 16f;
         label.fontStyle = FontStyles.Bold;
-        label.color = Color.white;
+        label.color = LightButtonTextColor;
         label.alignment = TextAlignmentOptions.Center;
 
         return buttonGo.GetComponent<Button>();

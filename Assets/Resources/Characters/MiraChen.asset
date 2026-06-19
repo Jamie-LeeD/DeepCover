@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCProfile
   characterDisplayName: Dr. Mira Chen
   roleTitle: Lead ARCHIVE Researcher
+  isAccusable: 1
+  suspectID: Dr. Mira Chen
+  accusationDisplayName: Dr. Mira Chen
   personality: 'Highly intelligent but emotionally exhausted. Nervous under pressure.
     Avoids eye contact. Feels guilty about her work. Wants someone to stop the project
     but fears retaliation.
@@ -29,3 +32,12 @@ MonoBehaviour:
     She hid backup research files in the lower archive level."
   startingTrust: 50
   fallbackLineOnAiFailure: "I\u2026 don\u2019t think I should talk about this."
+  evidenceResponses:
+  - evidenceItem: {fileID: 11400000, guid: 7c8d4187d5f185a498ecd8b14f572271, type: 2}
+    requiredTrustLevel: 10
+    secretRevealed: ARCHIVE started doing test on people without their consent.
+    successDialogue: It was going so well, untill ARCHIVE decided it wanted a bigger
+      pool of test subjects.
+    failureDialogue: This is not yours to look at
+    suspicionPenalty: 10
+    hasBeenRevealed: 0

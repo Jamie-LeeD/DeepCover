@@ -273,6 +273,7 @@ public static class DialogueQuestionInputViewBuilder
             tmp.fontSize = 14f;
             tmp.fontStyle = FontStyles.Bold;
             tmp.characterSpacing = 1.5f;
+            tmp.color = Color.white;
         }
 
         Button button = btnGo.GetComponent<Button>();

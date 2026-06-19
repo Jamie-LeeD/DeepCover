@@ -16,7 +16,7 @@ MonoBehaviour:
   description: An audio recording of Marcus Reed arguing with Evelyn Cross about
     shutting down ARCHIVE after abnormal behavioral incidents were detected within
     the facility.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 311789af743a5394ab629f333b1e92a6, type: 3}
   category: 4
   suspicionModifier: -20
   suspicionTone: 1

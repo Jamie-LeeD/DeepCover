@@ -15,6 +15,7 @@ public static class SpyGameUiBuilder
 {
     private const string RootName = "SpyGame_MainCanvas";
     private const string PrefabPath = "Assets/Prefabs/UI/SpyGame_MainCanvas.prefab";
+    private static readonly Color LightButtonTextColor = new Color(0f, 0.2f, 0.4f, 1f);
 
     [MenuItem("Tools/Create Spy Game UI", priority = 100)]
     public static void CreateSpyGameUi()
@@ -608,6 +609,15 @@ public static class SpyGameUiBuilder
             continueLabel.text = "CONTINUE";
             continueLabel.fontSize = 16f;
             continueLabel.fontStyle = FontStyles.Bold;
+            continueLabel.color = Color.white;
+        }
+        else if (continueGo.GetComponentInChildren<Text>() is Text continueLegacyLabel)
+        {
+            continueLegacyLabel.text = "CONTINUE";
+            continueLegacyLabel.fontSize = 16;
+            continueLegacyLabel.fontStyle = FontStyle.Bold;
+            continueLegacyLabel.alignment = TextAnchor.MiddleCenter;
+            continueLegacyLabel.color = Color.white;
         }
 
         Button continueButton = continueGo.GetComponent<Button>();
@@ -644,6 +654,15 @@ public static class SpyGameUiBuilder
             ejLabel.text = "EVIDENCE LOG";
             ejLabel.fontSize = 14f;
             ejLabel.fontStyle = FontStyles.Bold;
+            ejLabel.color = LightButtonTextColor;
+        }
+        else if (evidenceBtnGo.GetComponentInChildren<Text>() is Text evidenceLegacyLabel)
+        {
+            evidenceLegacyLabel.text = "EVIDENCE LOG";
+            evidenceLegacyLabel.fontSize = 14;
+            evidenceLegacyLabel.fontStyle = FontStyle.Bold;
+            evidenceLegacyLabel.alignment = TextAnchor.MiddleCenter;
+            evidenceLegacyLabel.color = LightButtonTextColor;
         }
 
         evidenceJournalButton = evidenceBtnGo.GetComponent<Button>();

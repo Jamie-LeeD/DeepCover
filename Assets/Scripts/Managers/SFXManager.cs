@@ -35,6 +35,12 @@ public class SFXManager : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] private float buttonVolume = 0.85f;
     [SerializeField] [Range(0f, 1f)] private float footstepVolume = 0.7f;
 
+    [Header("Background Music")]
+    [SerializeField] private AudioSource musicAudioSource;
+    [SerializeField] private AudioClip lobbyMusicClip;
+    [SerializeField] [Range(0f, 1f)] private float musicVolume = 0.35f;
+    [SerializeField] private bool playLobbyMusicOnStart = true;
+
     [Header("Button SFX")]
     [SerializeField] private bool autoBindUiButtons = true;
     [SerializeField] private string buttonClickKey = "ButtonClick";
@@ -60,6 +66,7 @@ public class SFXManager : MonoBehaviour
     private AudioSource audioSource;
     private float nextButtonScanTime;
     private float nextPlayerScanTime;
+    private bool musicInitialized;
 
     public IReadOnlyDictionary<string, AudioClip> SfxLibrary => sfxLibrary;
     public string DefaultFootstepKey => defaultFootstepKey;
@@ -99,11 +106,28 @@ public class SFXManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
+        EnsureMusicAudioSource();
         RebuildLibrary();
+        ResolveLobbyMusicClip();
+        Debug.Log("MusicManager initialized.", this);
+    }
+
+    private void OnValidate()
+    {
+        musicVolume = Mathf.Clamp01(musicVolume);
+        if (musicAudioSource != null)
+        {
+            ConfigureMusicAudioSource(logLoopEnabled: false);
+        }
     }
 
     private void Start()
     {
+        if (playLobbyMusicOnStart)
+        {
+            PlayLobbyMusic();
+        }
+
         BindUiButtons();
         EnsurePlayerFootsteps();
     }
@@ -180,6 +204,78 @@ public class SFXManager : MonoBehaviour
         return false;
     }
 
+    public void PlayLobbyMusic()
+    {
+        EnsureMusicAudioSource();
+        ResolveLobbyMusicClip();
+
+        if (musicAudioSource == null)
+        {
+            Debug.LogWarning("[MusicManager] No AudioSource available for background music.", this);
+            return;
+        }
+
+        if (lobbyMusicClip == null)
+        {
+            Debug.LogWarning("[MusicManager] Lobby music clip is not assigned or could not be found.", this);
+            return;
+        }
+
+        ConfigureMusicAudioSource();
+
+        if (musicAudioSource.isPlaying && musicAudioSource.clip == lobbyMusicClip)
+        {
+            return;
+        }
+
+        musicAudioSource.clip = lobbyMusicClip;
+        musicAudioSource.volume = musicVolume;
+        musicAudioSource.Play();
+        Debug.Log("Lobby music started.", this);
+    }
+
+    private void EnsureMusicAudioSource()
+    {
+        if (musicAudioSource == null)
+        {
+            AudioSource[] sources = GetComponents<AudioSource>();
+            for (int i = 0; i < sources.Length; i++)
+            {
+                if (sources[i] != null && sources[i] != audioSource)
+                {
+                    musicAudioSource = sources[i];
+                    break;
+                }
+            }
+        }
+
+        if (musicAudioSource == null)
+        {
+            musicAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        ConfigureMusicAudioSource();
+    }
+
+    private void ConfigureMusicAudioSource(bool logLoopEnabled = true)
+    {
+        if (musicAudioSource == null)
+        {
+            return;
+        }
+
+        musicAudioSource.loop = true;
+        musicAudioSource.playOnAwake = true;
+        musicAudioSource.spatialBlend = 0f;
+        musicAudioSource.volume = musicVolume;
+
+        if (logLoopEnabled && !musicInitialized)
+        {
+            musicInitialized = true;
+            Debug.Log("Lobby music loop enabled.", this);
+        }
+    }
+
     public void RegisterButton(Button button)
     {
         if (button == null || boundButtons.Contains(button))
@@ -222,6 +318,22 @@ public class SFXManager : MonoBehaviour
 #endif
     }
 
+    private void ResolveLobbyMusicClip()
+    {
+        if (lobbyMusicClip != null)
+        {
+            return;
+        }
+
+#if UNITY_EDITOR
+        lobbyMusicClip = FindEditorAudioClip("Lobby");
+        if (lobbyMusicClip == null)
+        {
+            lobbyMusicClip = FindEditorAudioClip("The Lobby");
+        }
+#endif
+    }
+
     private void AddToLibrary(string key, AudioClip clip)
     {
         if (string.IsNullOrWhiteSpace(key) || clip == null)
@@ -239,6 +351,32 @@ public class SFXManager : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    private AudioClip FindEditorAudioClip(string clipName)
+    {
+        string[] guids = AssetDatabase.FindAssets($"{clipName} t:AudioClip");
+        AudioClip fallbackClip = null;
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guids[i]);
+            AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            if (clip == null)
+            {
+                continue;
+            }
+
+            if (fallbackClip == null)
+            {
+                fallbackClip = clip;
+            }
+            if (!path.Contains("/Imports/"))
+            {
+                return clip;
+            }
+        }
+
+        return fallbackClip;
+    }
+
     private void AddEditorClipIfFound(string key, string clipName)
     {
         string[] guids = AssetDatabase.FindAssets($"{clipName} t:AudioClip");

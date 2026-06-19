@@ -327,6 +327,7 @@ public static class EvidenceJournalBuilder
             tmp.fontSize = 14f;
             tmp.fontStyle = FontStyles.Bold;
             tmp.characterSpacing = 1.8f;
+            tmp.color = Color.white;
         }
 
         Button button = buttonGo.GetComponent<Button>();

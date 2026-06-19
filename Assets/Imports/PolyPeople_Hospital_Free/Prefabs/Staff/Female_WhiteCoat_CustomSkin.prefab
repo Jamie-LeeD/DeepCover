@@ -54,8 +54,12 @@ PrefabInstance:
       objectReference: {fileID: -876546973899608171, guid: 5328f52c3be6202468063ceee9b27030, type: 3}
     - target: {fileID: 919132149155446097, guid: 6934b8394f672794caaffd8dca6ff34a, type: 3}
       propertyPath: m_Name
-      value: Female_WhiteCoat 1
+      value: Female_WhiteCoat_CustomSkin
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 6934b8394f672794caaffd8dca6ff34a, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 6934b8394f672794caaffd8dca6ff34a, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

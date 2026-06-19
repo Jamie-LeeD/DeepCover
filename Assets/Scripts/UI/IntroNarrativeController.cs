@@ -13,6 +13,8 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class IntroNarrativeController : MonoBehaviour
 {
+    private static readonly Color LightButtonTextColor = new Color(0f, 0.2f, 0.4f, 1f);
+
     private const string DefaultIntroText =
         "AGENT BRIEFING\n\n" +
         "You are an undercover operative assigned to investigate a series of intelligence leaks that have compromised active spy networks.\n\n" +
@@ -45,13 +47,62 @@ public class IntroNarrativeController : MonoBehaviour
     private Coroutine typingRoutine;
     private bool typingComplete;
     private bool introStarted;
+    private static int lastEnsuredGameSceneHandle = -1;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetRuntimeState()
+    {
+        IsIntroActive = false;
+        lastEnsuredGameSceneHandle = -1;
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void RegisterSceneLoadHandler()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void EnsureIntroForGameplayScene()
     {
-        if (SceneManager.GetActiveScene().name != "GameScene" ||
-            FindFirstObjectByType<IntroNarrativeController>(FindObjectsInactive.Include) != null)
+        EnsureIntroForScene(SceneManager.GetActiveScene());
+    }
+
+    private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        EnsureIntroForScene(scene);
+    }
+
+    private static void EnsureIntroForScene(Scene scene)
+    {
+        if (scene.name != "GameScene")
         {
+            return;
+        }
+
+        IntroNarrativeController existing =
+            FindFirstObjectByType<IntroNarrativeController>(FindObjectsInactive.Include);
+        if (existing != null && lastEnsuredGameSceneHandle == scene.handle)
+        {
+            return;
+        }
+
+        lastEnsuredGameSceneHandle = scene.handle;
+        Debug.Log("Game Scene Loaded");
+
+        if (existing != null)
+        {
+            if (!existing.gameObject.activeSelf)
+            {
+                existing.gameObject.SetActive(true);
+            }
+
+            if (!existing.enabled)
+            {
+                existing.enabled = true;
+            }
+
             return;
         }
 
@@ -60,12 +111,14 @@ public class IntroNarrativeController : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("Intro Manager Awake", this);
         ResolveReferences();
         WireButtons();
     }
 
     private void Start()
     {
+        Debug.Log("Intro Manager Start", this);
         if (SceneManager.GetActiveScene().name == gameplaySceneName)
         {
             StartIntro();
@@ -139,6 +192,7 @@ public class IntroNarrativeController : MonoBehaviour
 
     private IEnumerator TypeIntroText()
     {
+        Debug.Log("Typewriter Started", this);
         string text = string.IsNullOrWhiteSpace(introText) ? DefaultIntroText : introText;
         float delay = 1f / Mathf.Max(1f, charactersPerSecond);
 
@@ -245,10 +299,19 @@ public class IntroNarrativeController : MonoBehaviour
             introPanel.alpha = visible ? 1f : 0f;
             introPanel.blocksRaycasts = visible;
             introPanel.interactable = visible;
+            if (visible)
+            {
+                Debug.Log("Intro UI Activated", this);
+            }
+
             return;
         }
 
         gameObject.SetActive(visible);
+        if (visible)
+        {
+            Debug.Log("Intro UI Activated", this);
+        }
     }
 
     private void ResolveReferences()
@@ -417,7 +480,7 @@ public class IntroNarrativeController : MonoBehaviour
         label.fontSize = 16f;
         label.fontStyle = FontStyles.Bold;
         label.characterSpacing = 2f;
-        label.color = Color.white;
+        label.color = LightButtonTextColor;
         label.alignment = TextAlignmentOptions.Center;
 
         return buttonGo.GetComponent<Button>();

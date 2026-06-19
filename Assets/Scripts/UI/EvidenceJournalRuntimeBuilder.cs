@@ -302,6 +302,7 @@ public static class EvidenceJournalRuntimeBuilder
         labelText.fontSize = 14f;
         labelText.fontStyle = FontStyles.Bold;
         labelText.characterSpacing = 1.8f;
+        labelText.color = Color.white;
         labelText.alignment = TextAlignmentOptions.Center;
 
         Button button = buttonGo.GetComponent<Button>();

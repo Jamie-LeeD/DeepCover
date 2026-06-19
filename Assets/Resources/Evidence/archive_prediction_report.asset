@@ -18,7 +18,7 @@ MonoBehaviour:
     undercover operative with 87 percent confidence.
 
 '
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: df0c7c8b76ed3994d939e2b6c0eabbb4, type: 3}
   category: 0
   suspicionModifier: -20
   suspicionTone: 1

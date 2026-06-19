@@ -109,7 +109,7 @@ public static class PauseMenuBuilder
         RectTransform panelRt = panel.GetComponent<RectTransform>();
         panelRt.anchorMin = panelRt.anchorMax = new Vector2(0.5f, 0.5f);
         panelRt.pivot = new Vector2(0.5f, 0.5f);
-        panelRt.sizeDelta = new Vector2(420f, 280f);
+        panelRt.sizeDelta = new Vector2(420f, 350f);
         panelRt.anchoredPosition = Vector2.zero;
 
         Image panelBg = Undo.AddComponent<Image>(panel);
@@ -137,10 +137,80 @@ public static class PauseMenuBuilder
         titleLayout.preferredHeight = 52f;
 
         Button resume = CreateMenuButton(panel.transform, "ResumeButton", "RESUME", primary: true);
+        Button controls = CreateMenuButton(panel.transform, "ControlsButton", "CONTROLS", primary: false);
         Button mainMenu = CreateMenuButton(panel.transform, "MainMenuButton", "MAIN MENU", primary: false);
 
-        view.EditorSetReferences(rootGroup, resume, mainMenu, title);
+        GameObject controlsPanel = BuildControlsPanel(root.transform, out Button closeControls);
+
+        view.EditorSetReferences(rootGroup, panel, controlsPanel, resume, controls, mainMenu, closeControls, title);
         return view;
+    }
+
+    private static GameObject BuildControlsPanel(Transform parent, out Button closeButton)
+    {
+        GameObject panel = new GameObject("ControlsMenuPanel", typeof(RectTransform));
+        Undo.RegisterCreatedObjectUndo(panel, "Create Controls Menu Panel");
+        Undo.SetTransformParent(panel.transform, parent, "Parent Controls Menu Panel");
+
+        RectTransform panelRt = panel.GetComponent<RectTransform>();
+        panelRt.anchorMin = panelRt.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRt.pivot = new Vector2(0.5f, 0.5f);
+        panelRt.sizeDelta = new Vector2(560f, 460f);
+        panelRt.anchoredPosition = Vector2.zero;
+
+        Image panelBg = Undo.AddComponent<Image>(panel);
+        panelBg.color = new Color(0.05f, 0.08f, 0.12f, 0.96f);
+
+        Outline outline = Undo.AddComponent<Outline>(panel);
+        outline.effectColor = new Color(0.35f, 0.62f, 0.72f, 0.5f);
+        outline.effectDistance = new Vector2(2f, -2f);
+
+        TextMeshProUGUI title = CreateLabel(panel.transform, "ControlsTitle", "CONTROLS", 28f, FontStyles.Bold);
+        RectTransform titleRt = title.GetComponent<RectTransform>();
+        titleRt.anchorMin = titleRt.anchorMax = new Vector2(0.5f, 1f);
+        titleRt.pivot = new Vector2(0.5f, 1f);
+        titleRt.anchoredPosition = new Vector2(0f, -34f);
+        titleRt.sizeDelta = new Vector2(460f, 48f);
+        title.characterSpacing = 4f;
+        title.color = new Color(0.75f, 0.88f, 0.92f, 1f);
+
+        TextMeshProUGUI controls = CreateLabel(
+            panel.transform,
+            "ControlsList",
+            "W - Move Forward\n" +
+            "A - Move Left\n" +
+            "S - Move Backward\n" +
+            "D - Move Right\n\n" +
+            "E - Interact with Objects and NPCs\n" +
+            "I - Open Evidence Journal\n" +
+            "ESC - Open/Close Pause Menu\n" +
+            "Mouse Movement - Look Around",
+            18f,
+            FontStyles.Normal);
+        RectTransform controlsRt = controls.GetComponent<RectTransform>();
+        controlsRt.anchorMin = controlsRt.anchorMax = new Vector2(0.5f, 0.5f);
+        controlsRt.pivot = new Vector2(0.5f, 0.5f);
+        controlsRt.anchoredPosition = new Vector2(0f, -16f);
+        controlsRt.sizeDelta = new Vector2(460f, 300f);
+        controls.alignment = TextAlignmentOptions.Left;
+        controls.color = new Color(0.92f, 0.95f, 0.98f, 1f);
+        controls.textWrappingMode = TextWrappingModes.Normal;
+
+        closeButton = CreateMenuButton(panel.transform, "CloseControlsButton", "X", primary: false);
+        RectTransform closeRt = closeButton.GetComponent<RectTransform>();
+        closeRt.anchorMin = closeRt.anchorMax = new Vector2(1f, 1f);
+        closeRt.pivot = new Vector2(1f, 1f);
+        closeRt.anchoredPosition = new Vector2(-16f, -16f);
+        closeRt.sizeDelta = new Vector2(42f, 36f);
+
+        TextMeshProUGUI closeLabel = closeButton.GetComponentInChildren<TextMeshProUGUI>();
+        if (closeLabel != null)
+        {
+            closeLabel.fontSize = 18f;
+        }
+
+        panel.SetActive(false);
+        return panel;
     }
 
     public static GameplayPauseController EnsurePauseControllerPublic() => EnsurePauseController();
@@ -232,6 +302,7 @@ public static class PauseMenuBuilder
             tmp.fontSize = 15f;
             tmp.fontStyle = FontStyles.Bold;
             tmp.characterSpacing = 2f;
+            tmp.color = Color.white;
         }
 
         Button button = btnGo.GetComponent<Button>();
